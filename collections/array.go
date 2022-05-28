@@ -31,3 +31,7 @@ func (a Array[T]) Filter(fn func(T, int) bool) Array[T] {
 
 	return Array[T]{result}
 }
+
+func NewArray[T any](values []T) Array[T] {
+	return Array[T]{values}
+}
