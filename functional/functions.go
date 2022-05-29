@@ -91,3 +91,14 @@ func Find[T any](inputs []T, filter FilterFn[T]) *T {
 
 	return nil
 }
+
+// Flattens nested arrays
+func Flat[T any](inputs [][]T) []T {
+	result := []T{}
+
+	for _, v := range inputs {
+		result = append(result, v...)
+	}
+
+	return result
+}
