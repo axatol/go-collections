@@ -40,12 +40,12 @@ func Map[Input, Output any](inputs []Input, mapper MapFn[Input, Output]) ([]Outp
 	return result, nil
 }
 
-type ReduceFn[Accumulator, T any] func(accumulator *Accumulator, element T, index int) (*Accumulator, error)
+type ReduceFn[Accumulator, T any] func(accumulator Accumulator, element T, index int) (Accumulator, error)
 
 // Executes reducer for each element, the result being included in the parameter of the next execution
 //
 // Returns early if an error is given
-func Reduce[Accumulator, T any](inputs []T, initializer *Accumulator, reducer ReduceFn[Accumulator, T]) (*Accumulator, error) {
+func Reduce[Accumulator, T any](inputs []T, initializer Accumulator, reducer ReduceFn[Accumulator, T]) (*Accumulator, error) {
 	accumulator := initializer
 
 	err := ForEach(inputs, func(element T, index int) error {
@@ -61,7 +61,7 @@ func Reduce[Accumulator, T any](inputs []T, initializer *Accumulator, reducer Re
 		return nil, err
 	}
 
-	return accumulator, nil
+	return &accumulator, nil
 }
 
 type FilterFn[T any] func(element T, index int) bool
