@@ -1,3 +1,3 @@
-module github.com/hans-m-song/go-collections
+module github.com/axatol/go-collections
 
-go 1.18
+go 1.19
