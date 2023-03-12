@@ -1,3 +1,3 @@
-# go-collections
+# go-utils
 
 some simple utility structs

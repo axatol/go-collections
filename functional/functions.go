@@ -1,4 +1,4 @@
-package functional
+package fp
 
 type ForEachFn[T any] func(element T, index int) error
 

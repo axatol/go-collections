@@ -1,3 +1,3 @@
-module github.com/axatol/go-collections
+module github.com/axatol/go-utils
 
 go 1.19

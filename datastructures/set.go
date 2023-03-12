@@ -1,4 +1,4 @@
-package collections
+package ds
 
 type Set[T comparable] map[T]struct{}
 
@@ -78,9 +78,6 @@ func (left Set[T]) Intersection(right Set[T]) Set[T] {
 // Creates a clone of the set and removes the elements from the given set
 //
 // i.e. left - right
-//
-// Complement is essentially
-//   set.Difference(universal)
 func (left Set[T]) Difference(right Set[T]) Set[T] {
 	result := NewSet(left.Entries()...)
 	right.ForEach(func(element T) error {
