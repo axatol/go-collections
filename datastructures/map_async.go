@@ -35,6 +35,14 @@ type AsyncMap[T any] struct {
 	events chan AsyncMapEvent[T]
 }
 
+func NewAsyncMap[T any](initial ...map[string]AsyncMapItem[T]) *AsyncMap[T] {
+	if len(initial) == 1 {
+		return &AsyncMap[T]{items: initial[0]}
+	}
+
+	return &AsyncMap[T]{}
+}
+
 func (q *AsyncMap[T]) emit(item AsyncMapEvent[T]) {
 	select {
 	case q.events <- item:
