@@ -40,7 +40,9 @@ func NewAsyncMap[T any](initial ...map[string]AsyncMapItem[T]) *AsyncMap[T] {
 		return &AsyncMap[T]{items: initial[0]}
 	}
 
-	return &AsyncMap[T]{}
+	return &AsyncMap[T]{
+		items: map[string]AsyncMapItem[T]{},
+	}
 }
 
 func (q *AsyncMap[T]) emit(item AsyncMapEvent[T]) {

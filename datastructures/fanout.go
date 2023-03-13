@@ -21,7 +21,10 @@ type Fanout[T any] struct {
 // create a new Fanout, creates a goroutine to broadcast when an incoming
 // event is received
 func NewFanout[T any](incoming <-chan T) *Fanout[T] {
-	f := Fanout[T]{incoming: incoming}
+	f := Fanout[T]{
+		incoming:    incoming,
+		subscribers: map[string]subscriber[T]{},
+	}
 
 	go func() {
 		// continuously broadcast events
