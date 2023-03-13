@@ -13,19 +13,19 @@ type AsyncMapItem[T any] struct {
 }
 
 // type of possible actions that may be emitted
-type AsyncMapAction string
+type AsyncMapEventAction string
 
 const (
-	AddedAction     AsyncMapAction = "added"
-	CompletedAction AsyncMapAction = "completed"
-	FailedAction    AsyncMapAction = "failed"
-	RemovedAction   AsyncMapAction = "removed"
+	AddedEventAction     AsyncMapEventAction = "added"
+	CompletedEventAction AsyncMapEventAction = "completed"
+	FailedEventAction    AsyncMapEventAction = "failed"
+	RemovedEventAction   AsyncMapEventAction = "removed"
 )
 
 // the event emitted to subscribers
 type AsyncMapEvent[T any] struct {
-	Action AsyncMapAction  `json:"action"`
-	Item   AsyncMapItem[T] `json:"item"`
+	Action AsyncMapEventAction `json:"action"`
+	Item   AsyncMapItem[T]     `json:"item"`
 }
 
 // a thread-safe map with subscribable events
@@ -37,7 +37,9 @@ type AsyncMap[T any] struct {
 
 func NewAsyncMap[T any](initial ...map[string]AsyncMapItem[T]) *AsyncMap[T] {
 	if len(initial) == 1 {
-		return &AsyncMap[T]{items: initial[0]}
+		return &AsyncMap[T]{
+			items: initial[0],
+		}
 	}
 
 	return &AsyncMap[T]{
@@ -59,12 +61,17 @@ func (q *AsyncMap[T]) Subscribe() <-chan AsyncMapEvent[T] {
 	return q.events
 }
 
-// adds an element
+// adds an element, no effect if an element already exists
 func (q *AsyncMap[T]) Add(id string, data T) {
-	if _, ok := q.items[id]; ok {
+	if q.Get(id) != nil {
 		return
 	}
 
+	q.Set(id, data)
+}
+
+// adds an element, overwriting if element already exists
+func (q *AsyncMap[T]) Set(id string, data T) {
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -75,7 +82,7 @@ func (q *AsyncMap[T]) Add(id string, data T) {
 	}
 
 	q.items[id] = item
-	q.emit(AsyncMapEvent[T]{AddedAction, item})
+	q.emit(AsyncMapEvent[T]{AddedEventAction, item})
 }
 
 // sets the item as failed
@@ -90,7 +97,7 @@ func (q *AsyncMap[T]) SetFailed(id string) {
 
 	item.Failed = true
 	q.items[id] = item
-	q.emit(AsyncMapEvent[T]{FailedAction, item})
+	q.emit(AsyncMapEvent[T]{FailedEventAction, item})
 }
 
 // sets the item as completed
@@ -105,7 +112,7 @@ func (q *AsyncMap[T]) SetCompleted(id string) {
 
 	item.Completed = true
 	q.items[id] = item
-	q.emit(AsyncMapEvent[T]{FailedAction, item})
+	q.emit(AsyncMapEvent[T]{FailedEventAction, item})
 }
 
 // remove the item
@@ -118,7 +125,7 @@ func (q *AsyncMap[T]) Remove(id string) {
 		return
 	}
 
-	q.emit(AsyncMapEvent[T]{RemovedAction, item})
+	q.emit(AsyncMapEvent[T]{RemovedEventAction, item})
 	delete(q.items, id)
 }
 
