@@ -38,12 +38,14 @@ type AsyncMap[T any] struct {
 func NewAsyncMap[T any](initial ...map[string]AsyncMapItem[T]) *AsyncMap[T] {
 	if len(initial) == 1 {
 		return &AsyncMap[T]{
-			items: initial[0],
+			items:  initial[0],
+			events: make(chan AsyncMapEvent[T], 1),
 		}
 	}
 
 	return &AsyncMap[T]{
-		items: map[string]AsyncMapItem[T]{},
+		items:  map[string]AsyncMapItem[T]{},
+		events: make(chan AsyncMapEvent[T], 1),
 	}
 }
 
@@ -76,6 +78,7 @@ func (q *AsyncMap[T]) Set(id string, data T) {
 	defer q.mutex.Unlock()
 
 	item := AsyncMapItem[T]{
+		ID:        id,
 		Completed: false,
 		Failed:    false,
 		Data:      data,
@@ -112,7 +115,7 @@ func (q *AsyncMap[T]) SetCompleted(id string) {
 
 	item.Completed = true
 	q.items[id] = item
-	q.emit(AsyncMapEvent[T]{FailedEventAction, item})
+	q.emit(AsyncMapEvent[T]{CompletedEventAction, item})
 }
 
 // remove the item

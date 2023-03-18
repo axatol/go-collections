@@ -28,7 +28,7 @@ func NewFanout[T any](incoming <-chan T) *Fanout[T] {
 
 	go func() {
 		// continuously broadcast events
-		for event := range incoming {
+		for event := range f.incoming {
 			f.Broadcast(event)
 		}
 
