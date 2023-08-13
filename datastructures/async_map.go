@@ -36,15 +36,14 @@ type AsyncMap[T any] struct {
 }
 
 func NewAsyncMap[T any](initial ...map[string]AsyncMapItem[T]) *AsyncMap[T] {
+	items := map[string]AsyncMapItem[T]{}
 	if len(initial) == 1 {
-		return &AsyncMap[T]{
-			items:  initial[0],
-			events: make(chan AsyncMapEvent[T], 1),
-		}
+		items = initial[0]
 	}
 
 	return &AsyncMap[T]{
-		items:  map[string]AsyncMapItem[T]{},
+		mutex:  sync.RWMutex{},
+		items:  items,
 		events: make(chan AsyncMapEvent[T], 1),
 	}
 }
