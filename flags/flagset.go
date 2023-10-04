@@ -11,17 +11,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Set struct{ flag.FlagSet }
+type FlagSet struct{ FlagSet *flag.FlagSet }
 
-func (s *Set) UnsetFlags() []*flag.Flag {
+func (fs *FlagSet) Parse(arguments []string) error {
+	return fs.FlagSet.Parse(os.Args[1:])
+}
+
+func (fs *FlagSet) ParseArgs() {
+	fs.Parse(os.Args[1:])
+}
+
+func (fs *FlagSet) UnsetFlags() []*flag.Flag {
 	unset := ds.NewSet[*flag.Flag]()
-	s.VisitAll(func(f *flag.Flag) { unset.Add(f) })
-	s.Visit(func(f *flag.Flag) { unset.Del(f) })
+	fs.FlagSet.VisitAll(func(f *flag.Flag) { unset.Add(f) })
+	fs.FlagSet.Visit(func(f *flag.Flag) { unset.Del(f) })
 	return unset.Entries()
 }
 
-func (s *Set) LoadUnsetFromEnv() error {
-	for _, f := range s.UnsetFlags() {
+func (fs *FlagSet) LoadUnsetFromEnv() error {
+	for _, f := range fs.UnsetFlags() {
 		key := f.Name
 		key = strings.ReplaceAll(key, "-", "_")
 		key = strings.ToUpper(key)
@@ -38,8 +46,8 @@ func (s *Set) LoadUnsetFromEnv() error {
 	return nil
 }
 
-func (s *Set) LoadUnsetFromMap(inputs map[string]any) error {
-	for _, f := range s.UnsetFlags() {
+func (fs *FlagSet) LoadUnsetFromMap(inputs map[string]any) error {
+	for _, f := range fs.UnsetFlags() {
 		val, ok := inputs[f.Name]
 		if !ok {
 			continue
@@ -58,7 +66,7 @@ func (s *Set) LoadUnsetFromMap(inputs map[string]any) error {
 	return nil
 }
 
-func (s *Set) LoadUnsetFromJSONFile(filename string) error {
+func (fs *FlagSet) LoadUnsetFromJSONFile(filename string) error {
 	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %s", err)
@@ -69,10 +77,10 @@ func (s *Set) LoadUnsetFromJSONFile(filename string) error {
 		return fmt.Errorf("failed to parse file: %s", err)
 	}
 
-	return s.LoadUnsetFromMap(parsed)
+	return fs.LoadUnsetFromMap(parsed)
 }
 
-func (s *Set) LoadUnsetFromYAMLFile(filename string) error {
+func (fs *FlagSet) LoadUnsetFromYAMLFile(filename string) error {
 	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %s", err)
@@ -83,5 +91,5 @@ func (s *Set) LoadUnsetFromYAMLFile(filename string) error {
 		return fmt.Errorf("failed to parse file: %s", err)
 	}
 
-	return s.LoadUnsetFromMap(parsed)
+	return fs.LoadUnsetFromMap(parsed)
 }
