@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type FlagSet struct{ FlagSet *flag.FlagSet }
+type FlagSet struct{ *flag.FlagSet }
 
 func (fs *FlagSet) Parse(arguments []string) error {
 	return fs.FlagSet.Parse(os.Args[1:])
