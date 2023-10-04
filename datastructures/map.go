@@ -1,19 +1,19 @@
 package ds
 
-type Map[T any] map[string]T
+type Map[K comparable, V any] map[K]V
 
-type MapEntry[T any] struct {
-	Key   string
-	Value T
+type MapEntry[K comparable, V any] struct {
+	Key   K
+	Value V
 }
 
 // Number of elements
-func (m Map[T]) Len() int {
+func (m Map[K, V]) Len() int {
 	return len(m)
 }
 
 // Calls a function for each element
-func (m Map[T]) ForEach(fn func(value T, key string) error) error {
+func (m Map[K, V]) ForEach(fn func(value V, key K) error) error {
 	for k, v := range m {
 		if err := fn(v, k); err != nil {
 			return err
@@ -24,11 +24,11 @@ func (m Map[T]) ForEach(fn func(value T, key string) error) error {
 }
 
 // Returns the keys as an array
-func (m Map[T]) Keys() []string {
+func (m Map[K, V]) Keys() []K {
 	index := 0
-	result := make([]string, m.Len())
+	result := make([]K, m.Len())
 
-	m.ForEach(func(value T, key string) error {
+	m.ForEach(func(value V, key K) error {
 		result[index] = key
 		index += 1
 		return nil
@@ -38,11 +38,11 @@ func (m Map[T]) Keys() []string {
 }
 
 // Returns the values as an array
-func (m Map[T]) Values() []T {
+func (m Map[K, V]) Values() []V {
 	index := 0
-	result := make([]T, m.Len())
+	result := make([]V, m.Len())
 
-	m.ForEach(func(value T, key string) error {
+	m.ForEach(func(value V, key K) error {
 		result[index] = value
 		index += 1
 		return nil
@@ -52,12 +52,12 @@ func (m Map[T]) Values() []T {
 }
 
 // Returns an array of key-value structs of the entries
-func (m Map[T]) Entries() []MapEntry[T] {
+func (m Map[K, V]) Entries() []MapEntry[K, V] {
 	index := 0
-	result := make([]MapEntry[T], m.Len())
+	result := make([]MapEntry[K, V], m.Len())
 
-	m.ForEach(func(value T, key string) error {
-		result[index] = MapEntry[T]{Key: key, Value: value}
+	m.ForEach(func(value V, key K) error {
+		result[index] = MapEntry[K, V]{Key: key, Value: value}
 		index += 1
 		return nil
 	})
@@ -66,13 +66,13 @@ func (m Map[T]) Entries() []MapEntry[T] {
 }
 
 // Checks if the given element exists
-func (m Map[T]) Has(key string) bool {
+func (m Map[K, V]) Has(key K) bool {
 	_, ok := m[key]
 	return ok
 }
 
 // Retrieves the value associated with the given key or nil otherwise
-func (m Map[T]) Get(key string) *T {
+func (m Map[K, V]) Get(key K) *V {
 	if value, ok := m[key]; ok {
 		return &value
 	}
@@ -81,24 +81,24 @@ func (m Map[T]) Get(key string) *T {
 }
 
 // Sets the value associated with the given key, returns true if a value was overwritten
-func (m Map[T]) Set(key string, value T) bool {
+func (m Map[K, V]) Set(key K, value V) bool {
 	exists := m.Has(key)
 	m[key] = value
 	return exists
 }
 
 // Deletes the value associated with the given key, returns true if a value was deleted
-func (m Map[T]) Del(key string) bool {
+func (m Map[K, V]) Del(key K) bool {
 	exists := m.Has(key)
 	delete(m, key)
 	return exists
 }
 
 // Instantiates a new map, optionally copying in the entries of the given map
-func NewMap[T any](initial ...map[string]T) Map[T] {
-	result := make(Map[T])
+func NewMap[K comparable, V any](initial ...map[K]V) Map[K, V] {
+	result := make(Map[K, V])
 
-	if len(initial) < 1 {
+	if len(initial) < 1 || initial[0] == nil {
 		return result
 	}
 
