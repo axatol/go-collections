@@ -17,12 +17,20 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) String() string {
-	if v != nil && len(v.Valid) > 0 {
-		return v.Valid[0]
+	if v == nil {
+		return ""
+	}
+
+	if v.value != nil {
+		return *v.value
 	}
 
 	if v.Default != nil {
 		return *v.Default
+	}
+
+	if len(v.Valid) > 0 {
+		return v.Valid[0]
 	}
 
 	return ""
@@ -52,11 +60,15 @@ type LogLevelValue struct {
 }
 
 func (v *LogLevelValue) String() string {
-	if v != nil && v.value != nil {
+	if v == nil {
+		return ""
+	}
+
+	if v.value != nil {
 		return *v.value
 	}
 
-	if v != nil && v.Default != nil {
+	if v.Default != nil {
 		return *v.Default
 	}
 

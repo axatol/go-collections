@@ -93,3 +93,19 @@ func (fs *FlagSet) LoadUnsetFromYAMLFile(filename string) error {
 
 	return fs.LoadUnsetFromMap(parsed)
 }
+
+func (fs *FlagSet) LoadUnsetFromFile(filename string) error {
+	if strings.HasSuffix(filename, "json") {
+		if err := fs.LoadUnsetFromJSONFile(filename); err != nil {
+			panic(err)
+		}
+	}
+
+	if strings.HasSuffix(filename, "yaml") || strings.HasSuffix(filename, "yml") {
+		if err := fs.LoadUnsetFromYAMLFile(filename); err != nil {
+			panic(err)
+		}
+	}
+
+	return fmt.Errorf("unsupported file extension")
+}
