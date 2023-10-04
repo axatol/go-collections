@@ -46,14 +46,21 @@ func (v *EnumValue) Get() any {
 // matches zerolog log levels
 var ValidLogLevels = []string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}
 
-type LogLevelValue struct{ value *string }
+type LogLevelValue struct {
+	Default *string
+	value   *string
+}
 
 func (v *LogLevelValue) String() string {
-	if v == nil || v.value == nil {
-		return ""
+	if v != nil && v.value != nil {
+		return *v.value
 	}
 
-	return string(*v.value)
+	if v != nil && v.Default != nil {
+		return *v.Default
+	}
+
+	return ""
 }
 
 func (v *LogLevelValue) Set(val string) error {
