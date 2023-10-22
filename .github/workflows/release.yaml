@@ -1,5 +1,7 @@
 name: Release
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - master
@@ -49,4 +51,4 @@ jobs:
 
       - if: github.ref == 'refs/heads/master'
         name: Refresh pkg.go.dev
-        run: go get -u github.com/${{ github.repository }}@${{ steps.next.outputs.next-version }}
+        run: go get -u github.com/${{ github.repository }}@v${{ steps.next.outputs.next-version }}
