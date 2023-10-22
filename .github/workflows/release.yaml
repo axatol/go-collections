@@ -27,11 +27,6 @@ jobs:
           go vet ./...
           go test ./...
 
-      - name: Configure git identity
-        run: |
-          git config --set user.name ${{ github.actor.name }}
-          git config --set user.email ${{ github.actor.email }}
-
       - name: Get last tag
         id: last
         run: |
