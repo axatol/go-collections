@@ -7,15 +7,19 @@ import (
 )
 
 type Response[T any] struct {
-	Headers map[string]string `json:"-"`
-	Status  int               `json:"-"`
-	Error   error             `json:"-"`
-	Message string            `json:"message"`
-	Data    *T                `json:"data"`
+	Headers http.Header `json:"-"`
+	Status  int         `json:"-"`
+	Error   error       `json:"-"`
+	Message string      `json:"message"`
+	Data    *T          `json:"data"`
 }
 
 func (r *Response[T]) AddHeader(key, value string) *Response[T] {
-	r.Headers[key] = value
+	if r.Headers == nil {
+		r.Headers = http.Header{}
+	}
+
+	r.Headers[key] = append(r.Headers[key], value)
 	return r
 }
 
@@ -43,30 +47,28 @@ func (r *Response[T]) Write(w http.ResponseWriter) (int, error) {
 	if r.Status == 0 {
 		if r.Error != nil {
 			r.Status = http.StatusInternalServerError
+		} else {
+			r.Status = http.StatusOK
 		}
-
-		r.Status = http.StatusOK
 	}
 
 	if r.Message == "" {
 		if r.Error != nil {
 			r.Message = r.Error.Error()
-		} else if r.Status >= 200 && r.Status < 300 {
-			r.Message = "OK"
-		} else if r.Status >= 400 && r.Status < 500 {
-			r.Message = "Bad request"
-		} else if r.Status >= 500 {
-			r.Message = "An error occurred"
+		} else {
+			r.Message = http.StatusText(r.Status)
 		}
 	}
 
-	raw, err := json.Marshal(w)
+	raw, err := json.Marshal(r)
 	if err != nil {
 		return 0, fmt.Errorf("failed to serialise response body: %s", err)
 	}
 
-	for k, v := range r.Headers {
-		w.Header().Add(k, v)
+	for name, values := range r.Headers {
+		for _, value := range values {
+			w.Header().Add(name, value)
+		}
 	}
 
 	w.WriteHeader(r.Status)
