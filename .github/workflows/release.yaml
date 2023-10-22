@@ -30,6 +30,7 @@ jobs:
       - name: Get last tag
         id: last
         run: |
+          git fetch --tags
           version=$(git describe --tags --abbrev=0)
           version=${version#v}
           echo "version=${version}" >> $GITHUB_OUTPUT
