@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  release:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Quality checks
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Configure git identity
+        run: |
+          git config --set user.name ${{ github.actor.name }}
+          git config --set user.email ${{ github.actor.email }}
+
+      - name: Get last tag
+        id: last
+        run: |
+          version=$(git describe --tags --abbrev=0)
+          version=${version#v}
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - id: next
+        uses: axatol/actions/increment-semver@release
+        with:
+          version: ${{ steps.last.outputs.version }}
+
+      - if: github.ref == 'refs/heads/master'
+        name: Push tag
+        run: |
+          version="v${{ steps.next.outputs.next-version }}"
+          git tag ${version}
+          git push -u origin ${version}
