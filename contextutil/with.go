@@ -14,11 +14,13 @@ var (
 	InterruptSignals = []os.Signal{syscall.SIGINT, syscall.SIGTERM, os.Interrupt}
 )
 
-func WithInterrupt(ctx context.Context, signals ...os.Signal) context.Context {
+// creates a context that can be cancelled by an interrupt signal
+func WithInterrupt(ctx context.Context, signals ...os.Signal) (context.Context, context.CancelCauseFunc) {
 	return WithInterruptCause(ctx, ErrInterrupted, signals...)
 }
 
-func WithInterruptCause(ctx context.Context, cause error, signals ...os.Signal) context.Context {
+// creates a context that can be cancelled by an interrupt signal with a reason
+func WithInterruptCause(ctx context.Context, cause error, signals ...os.Signal) (context.Context, context.CancelCauseFunc) {
 	if len(signals) < 1 {
 		signals = InterruptSignals
 	}
@@ -32,5 +34,5 @@ func WithInterruptCause(ctx context.Context, cause error, signals ...os.Signal) 
 		cancel(cause)
 	}()
 
-	return ctx
+	return ctx, cancel
 }
