@@ -1,14 +1,16 @@
 name: Release
+
 on:
   workflow_dispatch:
 
   push:
     branches:
       - master
-
-  pull_request:
-    branches:
-      - master
+    paths:
+      - go.mod
+      - go.sum
+      - "**/*.go"
+      - "!**/*_test.go"
 
 jobs:
   release:

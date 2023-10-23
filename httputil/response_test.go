@@ -1,11 +1,15 @@
 package httputil_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/axatol/go-utils/httputil"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Response_AddHeader(t *testing.T) {
@@ -32,44 +36,45 @@ func Test_Response_AddHeader(t *testing.T) {
 }
 
 func Test_Response_Write(t *testing.T) {
-	w := httputil.MockResponseWriter{}
-	r := httputil.Response[map[string]string]{}
-	r.SetStatus(http.StatusOK)
-	r.AddHeader("X-Some-Header", "Blah")
-	r.SetData(&map[string]string{"foo": "bar"})
+	// given
+	recorder := httptest.NewRecorder()
+	response := httputil.Response[map[string]string]{}
 
-	if _, err := r.Write(&w); err != nil {
-		t.Fatalf("expected err to be nil, got: %s", err)
-	}
+	// when
+	response.SetStatus(http.StatusOK)
+	response.AddHeader("X-Some-Header", "Blah")
+	response.SetData(&map[string]string{"foo": "bar"})
+	_, err := response.Write(recorder)
+	result := recorder.Result()
 
-	if r.Status != w.WrittenStatusCode {
-		t.Fatalf("expected status code to be %d, got %d", r.Status, w.WrittenStatusCode)
-	}
-
-	if err := w.TestEqualsHeaders(r.Headers); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := w.TestEqualsBody(r); err != nil {
-		t.Fatal(err)
-	}
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, response.Status, result.StatusCode)
+	assert.ObjectsAreEqual(response.Headers, result.Header)
+	responseBody, err := json.Marshal(response)
+	assert.NoError(t, err)
+	resultBody, err := io.ReadAll(result.Body)
+	assert.NoError(t, err)
+	assert.JSONEq(t, string(responseBody), string(resultBody))
 }
 
 func Test_Response_Error(t *testing.T) {
-	w := httputil.MockResponseWriter{}
-	r := httputil.Response[map[string]string]{}
+	// given
+	recorder := httptest.NewRecorder()
+	response := httputil.Response[map[string]string]{}
 	expectedErr := fmt.Errorf("blah")
-	r.SetError(expectedErr)
 
-	if _, err := r.Write(&w); err != nil {
-		t.Fatalf("expected err to be nil, got: %s", err)
-	}
+	// when
+	response.SetError(expectedErr)
+	_, err := response.Write(recorder)
+	result := recorder.Result()
 
-	if r.Status != w.WrittenStatusCode {
-		t.Fatalf("expected status code to be %d, got %d", r.Status, w.WrittenStatusCode)
-	}
-
-	if err := w.TestEqualsBody(r); err != nil {
-		t.Fatal(err)
-	}
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, response.Status, result.StatusCode)
+	responseBody, err := json.Marshal(response)
+	assert.NoError(t, err)
+	resultBody, err := io.ReadAll(result.Body)
+	assert.NoError(t, err)
+	assert.JSONEq(t, string(responseBody), string(resultBody))
 }
