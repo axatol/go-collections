@@ -50,7 +50,3 @@ jobs:
           version="v${{ steps.next.outputs.next-version }}"
           git tag ${version}
           git push -u origin ${version}
-
-      - if: github.ref == 'refs/heads/master'
-        name: Refresh pkg.go.dev
-        run: go get -u github.com/${{ github.repository }}@v${{ steps.next.outputs.next-version }}
