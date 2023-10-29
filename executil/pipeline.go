@@ -7,11 +7,16 @@ import (
 )
 
 // NewPipeline create a new pipeline, optionally with commands
-func NewPipeline(cmds ...*exec.Cmd) *Pipeline {
-	return &Pipeline{
-		stdout: nil,
-		cmds:   cmds,
+func NewPipeline(cmds ...*exec.Cmd) (*Pipeline, error) {
+	pipeline := &Pipeline{stdout: nil}
+
+	for _, cmd := range cmds {
+		if err := pipeline.Append(cmd); err != nil {
+			return nil, err
+		}
 	}
+
+	return pipeline, nil
 }
 
 // Pipeline represents a series of commands linked by their stdout and stdin
