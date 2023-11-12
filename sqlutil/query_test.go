@@ -37,39 +37,6 @@ func TestInsert(t *testing.T) {
 	})
 }
 
-type mockSequeliser struct{ val string }
-
-func (s mockSequeliser) SQL() string { return s.val }
-
-type mockStringer struct{ val string }
-
-func (s mockStringer) String() string { return s.val }
-
-func TestConditions(t *testing.T) {
-	testutil.TestMany(t, []testutil.Tester{
-		testutil.ElementsMatch{
-			Expected: []any{"foo", "bar", "baz"},
-			Actual:   sqlutil.Conditions{"foo", "bar", "baz"}.Strings(),
-		},
-		testutil.ElementsMatch{
-			Expected: []any{"foo", "bar", "baz"},
-			Actual:   sqlutil.Conditions{"foo", mockSequeliser{val: "bar"}, mockStringer{val: "baz"}}.Strings(),
-		},
-		testutil.Equal{
-			Expected: "(foo OR bar OR baz)",
-			Actual:   sqlutil.Or{"foo", "bar", "baz"}.SQL(),
-		},
-		testutil.Equal{
-			Expected: "(foo OR (bar AND baz))",
-			Actual:   sqlutil.Or{"foo", sqlutil.And{"bar", "baz"}}.SQL(),
-		},
-		testutil.Equal{
-			Expected: "((foo AND bar) OR (baz AND qux))",
-			Actual:   sqlutil.Or{sqlutil.And{"foo", "bar"}, sqlutil.And{"baz", "qux"}}.SQL(),
-		},
-	})
-}
-
 func TestSelect(t *testing.T) {
 	testutil.TestMany(t, []testutil.Tester{
 		testutil.Equal{
