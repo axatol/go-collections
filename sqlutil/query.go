@@ -25,12 +25,12 @@ func (v Values) Placeholders() []string {
 	return placeholders
 }
 
-func (v Values) Conflict() []string {
-	conflict := make([]string, len(v))
+func (v Values) Assignment() []string {
+	assignment := make([]string, len(v))
 	for i, column := range v.Columns() {
-		conflict[i] = fmt.Sprintf("%s = :%s", column, column)
+		assignment[i] = fmt.Sprintf("%s = :%s", column, column)
 	}
-	return conflict
+	return assignment
 }
 
 func (v Values) Values() []any {
@@ -53,7 +53,7 @@ type Insert struct {
 func (i Insert) SQL() string {
 	columns := i.Values.Columns()
 	placeholders := i.Values.Placeholders()
-	conflict := i.Values.Conflict()
+	conflict := i.Values.Assignment()
 
 	verb := "INSERT"
 	if i.Upsert {

@@ -12,7 +12,7 @@ func TestValues(t *testing.T) {
 	testutil.TestMany(t, []testutil.Tester{
 		testutil.ElementsMatch{Expected: []any{"foo", "bar"}, Actual: values.Columns()},
 		testutil.ElementsMatch{Expected: []any{":foo", ":bar"}, Actual: values.Placeholders()},
-		testutil.ElementsMatch{Expected: []any{"foo = :foo", "bar = :bar"}, Actual: values.Conflict()},
+		testutil.ElementsMatch{Expected: []any{"foo = :foo", "bar = :bar"}, Actual: values.Assignment()},
 	})
 }
 
