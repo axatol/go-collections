@@ -142,21 +142,16 @@ func TestIndexString(t *testing.T) {
 	}{
 		{
 			input: sqlutil.Index{
-				Table: "table",
-				Columns: sqlutil.Columns{
-					{Name: "name"},
-				},
+				Table:   "table",
+				Columns: []string{"name"},
 			},
 			expected: "CREATE INDEX IF NOT EXISTS name ON table (name)",
 		},
 		{
 			input: sqlutil.Index{
-				Table:  "table",
-				Unique: true,
-				Columns: sqlutil.Columns{
-					{Name: "name", Type: "TEXT"},
-					{Name: "timestamp", Type: "INTEGER"},
-				},
+				Table:   "table",
+				Unique:  true,
+				Columns: []string{"name", "timestamp"},
 			},
 			expected: "CREATE UNIQUE INDEX IF NOT EXISTS name_timestamp ON table (name, timestamp)",
 		},
