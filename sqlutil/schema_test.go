@@ -28,44 +28,13 @@ func TestColumnString(t *testing.T) {
 		expected := test.expected
 		t.Run(expected, func(t *testing.T) {
 			t.Parallel()
-			actual := input.String()
+			actual := input.SQL()
 			assert.Equal(t, expected, actual)
 		})
 	}
 }
 
-func TestColumnsNames(t *testing.T) {
-	tests := []struct {
-		input    sqlutil.Columns
-		expected []string
-	}{
-		{
-			input: sqlutil.Columns{
-				{Name: "name", Type: "type", Options: "options"},
-			},
-			expected: []string{"name"},
-		},
-		{
-			input: sqlutil.Columns{
-				{Name: "foo", Type: "TEXT"},
-				{Name: "bar", Type: "INTEGER", Options: "NOT NULL"},
-			},
-			expected: []string{"foo", "bar"},
-		},
-	}
-
-	for _, test := range tests {
-		input := test.input
-		expected := test.expected
-		t.Run(strings.Join(expected, "_"), func(t *testing.T) {
-			t.Parallel()
-			actual := input.Names()
-			assert.Equal(t, expected, actual)
-		})
-	}
-}
-
-func TestColumnsColumns(t *testing.T) {
+func TestColumnsSQLs(t *testing.T) {
 	tests := []struct {
 		input    sqlutil.Columns
 		expected []string
@@ -90,7 +59,7 @@ func TestColumnsColumns(t *testing.T) {
 		expected := test.expected
 		t.Run(strings.Join(expected, "_"), func(t *testing.T) {
 			t.Parallel()
-			actual := input.Columns()
+			actual := input.SQLs()
 			assert.Equal(t, expected, actual)
 		})
 	}
@@ -129,7 +98,7 @@ func TestTableString(t *testing.T) {
 		expected := test.expected
 		t.Run(expected, func(t *testing.T) {
 			t.Parallel()
-			actual := input.String()
+			actual := input.SQL()
 			assert.Equal(t, expected, actual)
 		})
 	}
@@ -162,7 +131,7 @@ func TestIndexString(t *testing.T) {
 		expected := test.expected
 		t.Run(expected, func(t *testing.T) {
 			t.Parallel()
-			actual := input.String()
+			actual := input.SQL()
 			assert.Equal(t, expected, actual)
 		})
 	}
