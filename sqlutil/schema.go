@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+type Sequeliser interface{ SQL() string }
+
 type Column struct {
 	Name    string
 	Type    string

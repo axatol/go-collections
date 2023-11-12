@@ -1,138 +1,85 @@
 package sqlutil_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/axatol/go-utils/sqlutil"
-	"github.com/stretchr/testify/assert"
+	"github.com/axatol/go-utils/testutil"
 )
 
 func TestColumnString(t *testing.T) {
-	tests := []struct {
-		input    sqlutil.Column
-		expected string
-	}{
-		{
-			input:    sqlutil.Column{Name: "name", Type: "type", Options: "options"},
-			expected: "name type options",
+	testutil.TestMany(t, []testutil.Tester{
+		testutil.Equal{
+			Expected: "name type options",
+			Actual:   sqlutil.Column{Name: "name", Type: "type", Options: "options"}.SQL(),
 		},
-		{
-			input:    sqlutil.Column{Name: "name", Type: "type"},
-			expected: "name type",
+		testutil.Equal{
+			Expected: "name type",
+			Actual:   sqlutil.Column{Name: "name", Type: "type"}.SQL(),
 		},
-	}
-
-	for _, test := range tests {
-		input := test.input
-		expected := test.expected
-		t.Run(expected, func(t *testing.T) {
-			t.Parallel()
-			actual := input.SQL()
-			assert.Equal(t, expected, actual)
-		})
-	}
+	})
 }
 
 func TestColumnsSQLs(t *testing.T) {
-	tests := []struct {
-		input    sqlutil.Columns
-		expected []string
-	}{
-		{
-			input: sqlutil.Columns{
+	testutil.TestMany(t, []testutil.Tester{
+		testutil.Equal{
+			Expected: []string{"name type options"},
+			Actual: sqlutil.Columns{
 				{Name: "name", Type: "type", Options: "options"},
-			},
-			expected: []string{"name type options"},
+			}.SQLs(),
 		},
-		{
-			input: sqlutil.Columns{
+		testutil.Equal{
+			Expected: []string{"foo TEXT", "bar INTEGER NOT NULL"},
+			Actual: sqlutil.Columns{
 				{Name: "foo", Type: "TEXT"},
 				{Name: "bar", Type: "INTEGER", Options: "NOT NULL"},
-			},
-			expected: []string{"foo TEXT", "bar INTEGER NOT NULL"},
+			}.SQLs(),
 		},
-	}
-
-	for _, test := range tests {
-		input := test.input
-		expected := test.expected
-		t.Run(strings.Join(expected, "_"), func(t *testing.T) {
-			t.Parallel()
-			actual := input.SQLs()
-			assert.Equal(t, expected, actual)
-		})
-	}
+	})
 }
 
 func TestTableString(t *testing.T) {
-	tests := []struct {
-		input    sqlutil.Table
-		expected string
-	}{
-		{
-			input: sqlutil.Table{
+	testutil.TestMany(t, []testutil.Tester{
+		testutil.Equal{
+			Expected: "CREATE TABLE IF NOT EXISTS table (foo TEXT, bar INTEGER NOT NULL)",
+			Actual: sqlutil.Table{
 				Name: "table",
 				Columns: sqlutil.Columns{
 					{Name: "foo", Type: "TEXT"},
 					{Name: "bar", Type: "INTEGER", Options: "NOT NULL"},
 				},
-			},
-			expected: "CREATE TABLE IF NOT EXISTS table (foo TEXT, bar INTEGER NOT NULL)",
+			}.SQL(),
 		},
-		{
-			input: sqlutil.Table{
+		testutil.Equal{
+			Expected: "CREATE TABLE IF NOT EXISTS table (foo TEXT, bar INTEGER NOT NULL) WITHOUT ROWID",
+			Actual: sqlutil.Table{
 				Name:    "table",
 				Options: "WITHOUT ROWID",
 				Columns: sqlutil.Columns{
 					{Name: "foo", Type: "TEXT"},
 					{Name: "bar", Type: "INTEGER", Options: "NOT NULL"},
 				},
-			},
-			expected: "CREATE TABLE IF NOT EXISTS table (foo TEXT, bar INTEGER NOT NULL) WITHOUT ROWID",
+			}.SQL(),
 		},
-	}
-
-	for _, test := range tests {
-		input := test.input
-		expected := test.expected
-		t.Run(expected, func(t *testing.T) {
-			t.Parallel()
-			actual := input.SQL()
-			assert.Equal(t, expected, actual)
-		})
-	}
+	})
 }
 
 func TestIndexString(t *testing.T) {
-	tests := []struct {
-		input    sqlutil.Index
-		expected string
-	}{
-		{
-			input: sqlutil.Index{
+	testutil.TestMany(t, []testutil.Tester{
+		testutil.Equal{
+			Expected: "CREATE INDEX IF NOT EXISTS name ON table (name)",
+			Actual: sqlutil.Index{
 				Table:   "table",
 				Columns: []string{"name"},
-			},
-			expected: "CREATE INDEX IF NOT EXISTS name ON table (name)",
+			}.SQL(),
 		},
-		{
-			input: sqlutil.Index{
+		testutil.Equal{
+			Expected: "CREATE UNIQUE INDEX IF NOT EXISTS name_timestamp ON table (name, timestamp)",
+			Actual: sqlutil.Index{
 				Table:   "table",
 				Unique:  true,
 				Columns: []string{"name", "timestamp"},
-			},
-			expected: "CREATE UNIQUE INDEX IF NOT EXISTS name_timestamp ON table (name, timestamp)",
+			}.SQL(),
 		},
-	}
-
-	for _, test := range tests {
-		input := test.input
-		expected := test.expected
-		t.Run(expected, func(t *testing.T) {
-			t.Parallel()
-			actual := input.SQL()
-			assert.Equal(t, expected, actual)
-		})
-	}
+	})
 }
