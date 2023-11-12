@@ -54,7 +54,6 @@ func (t Table) String() string {
 }
 
 type Index struct {
-	Name    string
 	Unique  bool
 	Table   string
 	Columns Columns
@@ -69,7 +68,7 @@ func (i Index) String() string {
 	return fmt.Sprintf(
 		"CREATE %s IF NOT EXISTS %s ON %s (%s)",
 		indexType,
-		i.Name,
+		strings.Join(i.Columns.Names(), "_"),
 		i.Table,
 		strings.Join(i.Columns.Names(), ", "),
 	)
